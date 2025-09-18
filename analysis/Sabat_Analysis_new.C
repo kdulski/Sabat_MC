@@ -203,6 +203,8 @@ void AnalyzeFile(std::string NameOfFile, HistCollection histo)
           if (FirstTime > 0 && FirstTimeVeto > 0) {
             histo.FillEnergyDepositionVsTimeDiff(EnergyDepositFinal, FirstTime - FirstTimeVeto);
             histo.FillEnergyDepositionVsTimeDiffSmeared(eneSmeared, FirstTime - FirstTimeVeto);
+            histo.FillEnergyDepositionVsTimeDiffCut(EnergyDepositFinal, FirstTime - FirstTimeVeto);
+            histo.FillEnergyDepositionVsTimeDiffCutSmeared(eneSmeared, FirstTime - FirstTimeVeto);
           }
         }
       }
