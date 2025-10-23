@@ -83,11 +83,18 @@ public:
                                                  (maxEnergy - minEnergy)/eneBinSize, minEnergy - 0.5*eneBinSize, maxEnergy - 0.5*eneBinSize,
                                                  (maxTime - minTime)/timeBinSize, minTime - 0.5*timeBinSize, maxTime - 0.5*timeBinSize);
     double minTimeCut = 0.002, binSizeForTimeCut = 0.002;
-    int noOfBinsForTimeCut = 50;
-    EnergyDepositionVsTimeDiffCut = new TH2D("EnergyDepositionVsTimeDiffCut","Energy Deposition; Energy [MeV]; Time [us]", (maxEnergy - minEnergy)/eneBinSize,
+    int noOfBinsForTimeCut = 150;
+    EnergyDepositionVsTimeDiffCut = new TH2D("EnergyDepositionVsTimeDiffCut","Energy Deposition; Energy [MeV]; Time diff [us]", (maxEnergy - minEnergy)/eneBinSize,
                                              minEnergy - 0.5*eneBinSize, maxEnergy - 0.5*eneBinSize, noOfBinsForTimeCut,
                                              minTimeCut - 0.5*binSizeForTimeCut, minTimeCut + (noOfBinsForTimeCut-0.5)*binSizeForTimeCut);
-    EnergyDepositionVsTimeDiffCutSmeared = new TH2D("EnergyDepositionWithVetoSmearedVsTimeDiffCut","Energy Deposition Smeared; Energy [MeV]; Time [us]",
+    EnergyDepositionVsTimeDiffCutSmeared = new TH2D("EnergyDepositionWithVetoSmearedVsTimeDiffCut","Energy Deposition Smeared; Energy [MeV]; Time diff [us]",
+                                                    (maxEnergy - minEnergy)/eneBinSize, minEnergy - 0.5*eneBinSize, maxEnergy - 0.5*eneBinSize,
+                                                    noOfBinsForTimeCut, minTimeCut - 0.5*binSizeForTimeCut, minTimeCut + (noOfBinsForTimeCut-0.5)*binSizeForTimeCut);
+
+    EnergyDepositionVsTimeLaBrCut = new TH2D("EnergyDepositionVsTimeLaBrCut","Energy Deposition; Energy [MeV]; Time [us]", (maxEnergy - minEnergy)/eneBinSize,
+                                             minEnergy - 0.5*eneBinSize, maxEnergy - 0.5*eneBinSize, noOfBinsForTimeCut,
+                                             minTimeCut - 0.5*binSizeForTimeCut, minTimeCut + (noOfBinsForTimeCut-0.5)*binSizeForTimeCut);
+    EnergyDepositionVsTimeLaBrCutSmeared = new TH2D("EnergyDepositionWithVetoSmearedVsTimeLaBrCut","Energy Deposition Smeared; Energy [MeV]; Time [us]",
                                                     (maxEnergy - minEnergy)/eneBinSize, minEnergy - 0.5*eneBinSize, maxEnergy - 0.5*eneBinSize,
                                                     noOfBinsForTimeCut, minTimeCut - 0.5*binSizeForTimeCut, minTimeCut + (noOfBinsForTimeCut-0.5)*binSizeForTimeCut);
   }
@@ -112,6 +119,20 @@ public:
       double binCent = EnergyDepositionVsTimeDiffCutSmeared->GetYaxis()->GetBinCenter(i);
       if (time > binCent)
         EnergyDepositionVsTimeDiffCutSmeared->Fill(energy, binCent);
+    }
+  }
+  void FillEnergyDepositionVsTimeLaBrCut(double energy, double time) {
+    for (unsigned i=1; i<EnergyDepositionVsTimeLaBrCut->GetYaxis()->GetNbins(); i++) {
+      double binCent = EnergyDepositionVsTimeLaBrCut->GetYaxis()->GetBinCenter(i);
+      if (time > binCent)
+        EnergyDepositionVsTimeLaBrCut->Fill(energy, binCent);
+    }
+  }
+  void FillEnergyDepositionVsTimeLaBrCutSmeared(double energy, double time) {
+    for (unsigned i=1; i<EnergyDepositionVsTimeLaBrCutSmeared->GetYaxis()->GetNbins(); i++) {
+      double binCent = EnergyDepositionVsTimeLaBrCutSmeared->GetYaxis()->GetBinCenter(i);
+      if (time > binCent)
+        EnergyDepositionVsTimeLaBrCutSmeared->Fill(energy, binCent);
     }
   }
   void FillEnergyDepositionForAProcess(double energy, char label) {
@@ -167,6 +188,8 @@ public:
     EnergyDepositionVsTimeDiffSmeared->Write("EnergyDepositionVsTimeDiffSmeared");
     EnergyDepositionVsTimeDiffCut->Write("EnergyDepositionVsTimeDiffCut");
     EnergyDepositionVsTimeDiffCutSmeared->Write("EnergyDepositionVsTimeDiffCutSmeared");
+    EnergyDepositionVsTimeLaBrCut->Write("EnergyDepositionVsTimeLaBrCut");
+    EnergyDepositionVsTimeLaBrCutSmeared->Write("EnergyDepositionVsTimeLaBrCutSmeared");
     EnergyDepositionCapture->Write("EnergyDepositionCapture");
     EnergyDepositionInelastic->Write("EnergyDepositionInelastic");
     EnergyDepositionOther->Write("EnergyDepositionOther");
@@ -196,6 +219,8 @@ private:
   TH2D *EnergyDepositionVsTimeDiffSmeared;
   TH2D *EnergyDepositionVsTimeDiffCut;
   TH2D *EnergyDepositionVsTimeDiffCutSmeared;
+  TH2D *EnergyDepositionVsTimeLaBrCut;
+  TH2D *EnergyDepositionVsTimeLaBrCutSmeared;
 
   TH1D *EnergyDepositionCapture;
   TH1D *EnergyDepositionInelastic;
