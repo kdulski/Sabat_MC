@@ -40,7 +40,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* detCons) : G4UImessen
   fDetDir->SetGuidance("Detector list commands");
 
   fSetTargetMaterial = new G4UIcmdWithAString("/sabat/det/changeTargetMaterial", this);
-  fSetTargetMaterial->SetGuidance("Option to change material of the target - Water, MustardGas, TNT, Clark1, Clark2");
+  fSetTargetMaterial->SetGuidance("Option to change material of the target - Water, MustardGas, TNT, Clark1, Clark2 adn Adamsite");
 
   fSetGeometryVersion = new G4UIcmdWithAString("/sabat/det/setGeometryVersion", this);
   fSetGeometryVersion->SetGuidance("Option to change geometry version - V1, V2");
@@ -61,12 +61,14 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     } else if (newValue == "Mustard" || newValue == "mustard" ||newValue == "MustardGas" || newValue == "mustardgas" ||
                newValue == "M" || newValue == "m" || newValue == "MG" || newValue == "mg") {
       fDet->SetTarget(TargetVariables::fMustardGas);
-    } else if (newValue == "TNT" || newValue == "tnt" ||newValue == "T" || newValue == "t") {
+    } else if (newValue == "TNT" || newValue == "tnt" || newValue == "T" || newValue == "t") {
       fDet->SetTarget(TargetVariables::fTNT);
-    } else if (newValue == "Clark1" || newValue == "clark1" ||newValue == "C1" || newValue == "c1") {
+    } else if (newValue == "Clark1" || newValue == "clark1" || newValue == "C1" || newValue == "c1") {
       fDet->SetTarget(TargetVariables::fClark1);
-    } else if (newValue == "Clark2" || newValue == "clark2" ||newValue == "C2" || newValue == "c2") {
+    } else if (newValue == "Clark2" || newValue == "clark2" || newValue == "C2" || newValue == "c2") {
       fDet->SetTarget(TargetVariables::fClark2);
+    } else if (newValue == "Adamsite" || newValue == "adamsite" || newValue == "Adam" || newValue == "adam" || newValue == "A" || newValue == "a") {
+      fDet->SetTarget(TargetVariables::fAdamsite);
     }
   }
 

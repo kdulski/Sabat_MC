@@ -58,6 +58,9 @@ PrimaryGeneratorMessenger::PrimaryGeneratorMessenger(PrimaryGeneratorAction* pri
   fSetSourcePositionY->SetGuidance("Set the Y position of the source");
   fSetSourcePositionY->SetDefaultValue(-15*cm);
   fSetSourcePositionY->SetUnitCandidates("cm");
+
+  fRequireHitOfAlphaInVeto = new G4UIcmdWithoutParameter("/sabat/primGen/requireAlphaInVeto", this);
+  fRequireHitOfAlphaInVeto->SetGuidance("Option not to simulate events when alpha always hit the Veto");
 }
 
 PrimaryGeneratorMessenger::~PrimaryGeneratorMessenger()
@@ -68,6 +71,7 @@ PrimaryGeneratorMessenger::~PrimaryGeneratorMessenger()
   delete fSetNeutronEnergy;
   delete fSetAlphaEnergy;
   delete fSetSourcePositionY;
+  delete fRequireHitOfAlphaInVeto;
 }
 
 void PrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
@@ -82,5 +86,7 @@ void PrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command, G4String newVa
     fPrimGen->SetAlphaEnergy(fSetAlphaEnergy->GetNewDoubleValue(newValue));
   } else if (command == fSetSourcePositionY) {
     fPrimGen->SetSourcePosition(G4ThreeVector(0., fSetSourcePositionY->GetNewDoubleValue(newValue), 20. * cm));
+  } else if (command == fRequireHitOfAlphaInVeto) {
+    fPrimGen->SetAlwaysAlphaInVetoTrue();
   }
 }

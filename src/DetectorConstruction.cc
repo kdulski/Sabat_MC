@@ -206,6 +206,13 @@ void DetectorConstruction::ConstructMaterials()
     Clark2->AddElement(As, 1);
     Clark2->AddElement(N, 1);
 
+    G4Material *Adamsite = new G4Material("Adamsite", 1.65 * g / cm3, 5);
+    Adamsite->AddElement(C, 12);
+    Adamsite->AddElement(H, 9);
+    Adamsite->AddElement(As, 1);
+    Adamsite->AddElement(Cl, 1);
+    Adamsite->AddElement(N, 1);
+
     G4Material *SiO2 = new G4Material("Silicon_Dioxide", 2.196 * g / cm3, 2);
     SiO2->AddElement(Si, 1);
     SiO2->AddElement(O, 2);
@@ -258,6 +265,9 @@ void DetectorConstruction::ConstructMaterials()
     case TargetVariables::fClark2:
         fTargetMat = Clark2;
         break;
+    case TargetVariables::fAdamsite:
+      fTargetMat = Adamsite;
+      break;
     }
 }
 
@@ -710,14 +720,12 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
     logicROVPP->SetVisAttributes(ROVVisAtt);
 
 
-
-
     // Veto construction
     // Active area of silicon detector -> 5 - 55 mm (circle radius)
     G4double vetoDimx = 8 * cm;
     G4double vetoDimY = 1 * mm; // 2cm -> max thickness for silicon detectors
     G4double vetoDimZ = 8 * cm;
-    
+
     G4Box *solidVeto = new G4Box("DetectorSi", 0.5 * vetoDimx, 0.5 * vetoDimY, 0.5 * vetoDimZ);
     G4LogicalVolume *logicVeto = new G4LogicalVolume(solidVeto, fVetoMat, "DetectorSi");
     
@@ -725,9 +733,6 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
     G4VisAttributes *VetoAtt = new G4VisAttributes(G4Color(1.0, 1., 0.5));
     VetoAtt->SetForceSolid(true);
     logicVeto->SetVisAttributes(VetoAtt);
-
-    
-
 
 //------------Placement-----------//
     G4RotationMatrix *rotationSand = new G4RotationMatrix();
@@ -784,6 +789,8 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
 
     std::cout << "--------------------------Source is placed at: " << generatorCaseShift  << std::endl;
     fPrimGen->SetSourcePosition(generatorCaseShift);
+    std::cout << "--------------------------Veto is placed at: " << generatorCaseShift+vetoShift  << std::endl;
+    fPrimGen->SetVetoShiftAndDimensions(vetoShift(2), G4ThreeVector(vetoDimx, vetoDimY, vetoDimZ));
     //Arm - detector
     G4ThreeVector armShiftDet = detectorCaseShift + G4ThreeVector(
         0.,
@@ -808,10 +815,6 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
     new G4PVPlacement (0, G4ThreeVector(), logicROVSteel, "ROVSteel", logicROVPP, false, 15, checkOverlaps);
     new G4PVPlacement (0, G4ThreeVector(), logicROVInner, "ROVSteelInner", logicROVSteel, false, 16, checkOverlaps);
 
-
-    
-    
-    
     return physWorld;
 }
 

@@ -22,40 +22,40 @@
 // * use  in  resulting  scientific  publications,  and indicate your *
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
+// --------------------------------------------------------------
+// Based on
 //
-/// \file PrimaryGeneratorMessenger.hh
+//                  Underground Advanced
+//               by A. Howard and H. Araujo 
+//                    (27th November 2001)
+//
+// SpecialCuts header
+// --------------------------------------------------------------
 
-#ifndef PrimaryGeneratorMessenger_h
-#define PrimaryGeneratorMessenger_h 1
+#ifndef SpecialCuts_h
+#define SpecialCuts_h 1
 
-#include "G4SystemOfUnits.hh"
-#include "G4UImessenger.hh"
+#include "G4ios.hh"
 #include "globals.hh"
+#include "G4VProcess.hh"
 
-class PrimaryGeneratorAction;
-class G4UIdirectory;
-class G4UIcmdWithABool;
-class G4UIcmdWithoutParameter;
-class G4UIcmdWithADoubleAndUnit;
-
-class PrimaryGeneratorMessenger: public G4UImessenger
+class SpecialCuts : public G4VProcess
 {
 public:
-  PrimaryGeneratorMessenger(PrimaryGeneratorAction*);
-  ~PrimaryGeneratorMessenger();
-    
-  virtual void SetNewValue(G4UIcommand*, G4String);
-    
-private:
-  PrimaryGeneratorAction* fPrimGen;
+  SpecialCuts(const G4String& processName ="SpecialCut");
+  virtual ~SpecialCuts();
 
-  G4UIdirectory* fPrimGenDir;
-  G4UIcmdWithoutParameter* fRemoveNeutronFromGen = nullptr;
-  G4UIcmdWithoutParameter* fRemoveAlphaFromGen = nullptr;
-  G4UIcmdWithADoubleAndUnit* fSetNeutronEnergy = nullptr;
-  G4UIcmdWithADoubleAndUnit* fSetAlphaEnergy = nullptr;
-  G4UIcmdWithADoubleAndUnit* fSetSourcePositionY = nullptr;
-  G4UIcmdWithoutParameter* fRequireHitOfAlphaInVeto = nullptr;
+  virtual G4double PostStepGetPhysicalInteractionLength(const G4Track& track, G4double previousStepSize, G4ForceCondition* condition);
+  virtual G4VParticleChange* PostStepDoIt(const G4Track& , const G4Step&);
+  virtual G4double AtRestGetPhysicalInteractionLength(const G4Track& , G4ForceCondition*) {return -1.0;};
+  virtual G4VParticleChange* AtRestDoIt(const G4Track& , const G4Step&) {return NULL;};
+  virtual G4double AlongStepGetPhysicalInteractionLength(const G4Track&, G4double , G4double , G4double& , G4GPILSelection*)
+  {return -1.0;};
+  virtual G4VParticleChange* AlongStepDoIt(const G4Track& , const G4Step&) {return NULL;};
+
+private:
+  SpecialCuts& operator=(const SpecialCuts&) {return *this;};
 };
 
 #endif
+

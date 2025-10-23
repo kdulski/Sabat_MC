@@ -22,40 +22,57 @@
 // * use  in  resulting  scientific  publications,  and indicate your *
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
+// --------------------------------------------------------------
+// Based on
 //
-/// \file PrimaryGeneratorMessenger.hh
+//                  Underground Advanced
+//               by A. Howard and H. Araujo 
+//                    (27th November 2001)
+//
+// MaxTimeCuts program
+// --------------------------------------------------------------
 
-#ifndef PrimaryGeneratorMessenger_h
-#define PrimaryGeneratorMessenger_h 1
+#include "MaxTimeCuts.hh"
 
-#include "G4SystemOfUnits.hh"
-#include "G4UImessenger.hh"
-#include "globals.hh"
+#include "G4PhysicalConstants.hh"
+#include "G4VParticleChange.hh"
+#include "G4UserLimits.hh"
+#include "G4Step.hh"
 
-class PrimaryGeneratorAction;
-class G4UIdirectory;
-class G4UIcmdWithABool;
-class G4UIcmdWithoutParameter;
-class G4UIcmdWithADoubleAndUnit;
-
-class PrimaryGeneratorMessenger: public G4UImessenger
+MaxTimeCuts::MaxTimeCuts(const G4String& aName) : SpecialCuts(aName)
 {
-public:
-  PrimaryGeneratorMessenger(PrimaryGeneratorAction*);
-  ~PrimaryGeneratorMessenger();
-    
-  virtual void SetNewValue(G4UIcommand*, G4String);
-    
-private:
-  PrimaryGeneratorAction* fPrimGen;
+  if (verboseLevel>1) {
+    G4cout << GetProcessName() << " is created "<< G4endl;
+  }
+  SetProcessType(fUserDefined);
+}
 
-  G4UIdirectory* fPrimGenDir;
-  G4UIcmdWithoutParameter* fRemoveNeutronFromGen = nullptr;
-  G4UIcmdWithoutParameter* fRemoveAlphaFromGen = nullptr;
-  G4UIcmdWithADoubleAndUnit* fSetNeutronEnergy = nullptr;
-  G4UIcmdWithADoubleAndUnit* fSetAlphaEnergy = nullptr;
-  G4UIcmdWithADoubleAndUnit* fSetSourcePositionY = nullptr;
-  G4UIcmdWithoutParameter* fRequireHitOfAlphaInVeto = nullptr;
-};
+MaxTimeCuts::~MaxTimeCuts()
+{;}
 
-#endif
+MaxTimeCuts::MaxTimeCuts(MaxTimeCuts&) : SpecialCuts()
+{;}
+ 
+G4double MaxTimeCuts::PostStepGetPhysicalInteractionLength(const G4Track& aTrack, G4double , G4ForceCondition* condition)
+{
+  *condition = NotForced;
+
+  G4double proposedStep = DBL_MAX;
+  G4UserLimits* pUserLimits = aTrack.GetVolume()->GetLogicalVolume()->GetUserLimits();
+  const G4DynamicParticle* aParticle = aTrack.GetDynamicParticle();
+
+  if (pUserLimits) {
+    G4double temp = DBL_MAX;
+    G4double dTime = (pUserLimits->GetUserMaxTime(aTrack) - aTrack.GetGlobalTime());
+
+    if (dTime < 0. ) {
+      proposedStep = 0.;
+    } else {
+      G4double beta = (aParticle->GetTotalMomentum())/(aParticle->GetTotalEnergy());
+      temp = beta*c_light*dTime;
+      if (proposedStep > temp)
+        proposedStep = temp;
+    }
+  }
+  return proposedStep;
+}

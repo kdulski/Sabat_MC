@@ -22,40 +22,41 @@
 // * use  in  resulting  scientific  publications,  and indicate your *
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
+// --------------------------------------------------------------
+// Based on
 //
-/// \file PrimaryGeneratorMessenger.hh
+//                  Underground Advanced
+//               by A. Howard and H. Araujo 
+//                    (27th November 2001)
+//
+// SpecialCuts program
+// --------------------------------------------------------------
 
-#ifndef PrimaryGeneratorMessenger_h
-#define PrimaryGeneratorMessenger_h 1
+#include "SpecialCuts.hh"
+#include "G4VParticleChange.hh"
+#include "G4Track.hh"
+#include "G4Step.hh"
 
-#include "G4SystemOfUnits.hh"
-#include "G4UImessenger.hh"
-#include "globals.hh"
-
-class PrimaryGeneratorAction;
-class G4UIdirectory;
-class G4UIcmdWithABool;
-class G4UIcmdWithoutParameter;
-class G4UIcmdWithADoubleAndUnit;
-
-class PrimaryGeneratorMessenger: public G4UImessenger
+SpecialCuts::SpecialCuts(const G4String& aName) : G4VProcess(aName)
 {
-public:
-  PrimaryGeneratorMessenger(PrimaryGeneratorAction*);
-  ~PrimaryGeneratorMessenger();
-    
-  virtual void SetNewValue(G4UIcommand*, G4String);
-    
-private:
-  PrimaryGeneratorAction* fPrimGen;
+  if (verboseLevel>1) {
+    G4cout << GetProcessName() << " is created "<< G4endl;
+  }
+}
 
-  G4UIdirectory* fPrimGenDir;
-  G4UIcmdWithoutParameter* fRemoveNeutronFromGen = nullptr;
-  G4UIcmdWithoutParameter* fRemoveAlphaFromGen = nullptr;
-  G4UIcmdWithADoubleAndUnit* fSetNeutronEnergy = nullptr;
-  G4UIcmdWithADoubleAndUnit* fSetAlphaEnergy = nullptr;
-  G4UIcmdWithADoubleAndUnit* fSetSourcePositionY = nullptr;
-  G4UIcmdWithoutParameter* fRequireHitOfAlphaInVeto = nullptr;
-};
+SpecialCuts::~SpecialCuts()
+{;}
 
-#endif
+G4VParticleChange* SpecialCuts::PostStepDoIt(const G4Track& aTrack, const G4Step&)
+{
+  aParticleChange.Initialize(aTrack);
+  aParticleChange.ProposeEnergy(0.);
+  aParticleChange.ProposeLocalEnergyDeposit (aTrack.GetKineticEnergy());
+  aParticleChange.ProposeTrackStatus(fStopButAlive);
+  return &aParticleChange;
+}
+
+G4double SpecialCuts::PostStepGetPhysicalInteractionLength(const G4Track&, G4double, G4ForceCondition*)
+{
+  return DBL_MAX;
+}
