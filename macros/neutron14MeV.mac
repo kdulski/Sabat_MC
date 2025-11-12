@@ -3,6 +3,9 @@
 
 /sabat/det/changeTargetMaterial mustardgas
 /sabat/det/setGeometryVersion v2
+/sabat/det/setTargetVersion ship
+/sabat/det/setTargetDetectorDistance 5 cm
+/sabat/det/setTargetWallThickness 30 mm
 
 #/sabat/run/removeAlphaFromOutput n
 /sabat/run/addTimeAndSeedToFilename t

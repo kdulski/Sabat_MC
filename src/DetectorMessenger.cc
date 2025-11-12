@@ -25,7 +25,7 @@
 //
 /// \file DetectorMessenger.cc
 
-
+#include "G4UIcmdWithADoubleAndUnit.hh"
 #include "G4UIcmdWithoutParameter.hh"
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithABool.hh"
@@ -44,6 +44,19 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* detCons) : G4UImessen
 
   fSetGeometryVersion = new G4UIcmdWithAString("/sabat/det/setGeometryVersion", this);
   fSetGeometryVersion->SetGuidance("Option to change geometry version - V1, V2");
+
+  fSetTargetVersion = new G4UIcmdWithAString("/sabat/det/setTargetVersion", this);
+  fSetTargetVersion->SetGuidance("Option to change target version - ammo, ship");
+
+  fSetTargetDetectorDistance = new G4UIcmdWithADoubleAndUnit("/sabat/det/setTargetDetectorDistance", this);
+  fSetTargetDetectorDistance->SetGuidance("Set the distance between target and the setup");
+  fSetTargetDetectorDistance->SetDefaultValue(15*cm);
+  fSetTargetDetectorDistance->SetUnitCandidates("cm");
+
+  fSetTargetWallThickness = new G4UIcmdWithADoubleAndUnit("/sabat/det/setTargetWallThickness", this);
+  fSetTargetWallThickness->SetGuidance("Set the target wall thickness");
+  fSetTargetWallThickness->SetDefaultValue(30*mm);
+  fSetTargetWallThickness->SetUnitCandidates("mm");
 }
 
 DetectorMessenger::~DetectorMessenger()
@@ -51,6 +64,9 @@ DetectorMessenger::~DetectorMessenger()
   delete fDetDir;
   delete fSetTargetMaterial;
   delete fSetGeometryVersion;
+  delete fSetTargetVersion;
+  delete fSetTargetDetectorDistance;
+  delete fSetTargetWallThickness;
 }
 
 void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
@@ -70,9 +86,7 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     } else if (newValue == "Adamsite" || newValue == "adamsite" || newValue == "Adam" || newValue == "adam" || newValue == "A" || newValue == "a") {
       fDet->SetTarget(TargetVariables::fAdamsite);
     }
-  }
-
-  if (command == fSetGeometryVersion) {
+  } else if (command == fSetGeometryVersion) {
     if (newValue == "V1" || newValue == "v1" || newValue == "1") {
       fDet->SetGeometryVersion(GeometryVersion::fV1);
     } else if (newValue == "V2" || newValue == "v2" || newValue == "2") {
@@ -80,5 +94,17 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     } else {
       G4cout << "Unknown geometry version: " << newValue << G4endl;
     }
+  } else if (command == fSetTargetVersion) {
+    if (newValue == "Ammo" || newValue == "ammo" || newValue == "a") {
+      fDet->SetTargetVersion(TargetVersion::fAmmu);
+    } else if (newValue == "Ship" || newValue == "ship" || newValue == "s") {
+      fDet->SetTargetVersion(TargetVersion::fShip);
+    } else {
+      G4cout << "Unknown target version: " << newValue << G4endl;
+    }
+  } else if (command == fSetTargetDetectorDistance) {
+    fDet->SetTargetDetectorDistance(fSetTargetDetectorDistance->GetNewDoubleValue(newValue));
+  } else if (command == fSetTargetWallThickness) {
+    fDet->SetTargetWallThickness(fSetTargetWallThickness->GetNewDoubleValue(newValue));
   }
 }

@@ -37,6 +37,7 @@ class G4UIdirectory;
 class G4UIcmdWithABool;
 class G4UIcmdWithAString;
 class G4UIcmdWithoutParameter;
+class G4UIcmdWithADoubleAndUnit;
 
 class DetectorMessenger: public G4UImessenger
 {
@@ -52,6 +53,9 @@ private:
   G4UIdirectory* fDetDir;
   G4UIcmdWithAString* fSetTargetMaterial = nullptr;
   G4UIcmdWithAString* fSetGeometryVersion = nullptr;
+  G4UIcmdWithAString* fSetTargetVersion = nullptr;
+  G4UIcmdWithADoubleAndUnit* fSetTargetDetectorDistance = nullptr;
+  G4UIcmdWithADoubleAndUnit* fSetTargetWallThickness = nullptr;
 };
 
 #endif

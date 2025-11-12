@@ -28,6 +28,9 @@ enum TargetVariables {
 enum GeometryVersion {
   fV1, fV2
 };
+enum TargetVersion {
+  fAmmu, fShip
+};
 
 /// Detector construction class to define materials (with their physical properties) and detector geometry.
 class DetectorConstruction : public G4VUserDetectorConstruction
@@ -44,11 +47,14 @@ public:
   void ConstructMaterials();
   G4VPhysicalVolume* ConstructV1();
   G4VPhysicalVolume* ConstructV2();
-  
+  void ConstructTarget(G4LogicalVolume* logicWorld, G4ThreeVector targetCoverShift);
   void ConstructSDandField() override;
   void SetPrimGen(PrimaryGeneratorAction* primGen) {fPrimGen = primGen;};
-  void SetTarget(TargetVariables target) {targetType = target;};
   void SetGeometryVersion(GeometryVersion version) {geometryVersion = version;};
+  void SetTarget(TargetVariables target) {targetType = target;};
+  void SetTargetVersion(TargetVersion target) {targetVersion = target;};
+  void SetTargetDetectorDistance(G4double distance) {targetDetectorDistance = distance;};
+  void SetTargetWallThickness(G4double thickness) {targetWallSize = thickness;};
 
   void SetCADFilename(std::string name) {
     filename = name;
@@ -68,6 +74,7 @@ private:
 
   TargetVariables targetType = TargetVariables::fWater;
   GeometryVersion geometryVersion = GeometryVersion::fV2;
+  TargetVersion targetVersion = TargetVersion::fShip;
   G4ThreeVector sourcePos;
       
   G4VSolid *cad_solid;
@@ -86,6 +93,11 @@ private:
   G4Material* fVetoMat;
   G4Material* fIron;
   G4Material* fLead;
+
+  G4bool checkOverlaps = true;
+  G4double targetWallSize = 30 * mm; // 3 mm for fAmmu
+  G4double targetDetectorDistance = 0 * cm;
+  G4double targetShiftY = 25 * cm; // 25*cm for fAmmu, 75*cm for fShip
 };
 
 #endif

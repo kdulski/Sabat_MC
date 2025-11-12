@@ -275,9 +275,6 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV1()
 {
     //Function to construct the first version of the detector geometry.
     //
-    G4bool checkOverlaps = true;
-
-  
   //**************************
     G4RotationMatrix* rotationTarget = new G4RotationMatrix();
     rotationTarget->rotateY(90*deg);
@@ -411,9 +408,9 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV1()
     G4LogicalVolume* logicTGVolume = new G4LogicalVolume(solidTGVolume, fTargetMat, "TargetVolume");
     new G4PVPlacement(0, G4ThreeVector(), logicTGVolume, "TargetVolume", logicTGVolumeCover, false, 5, checkOverlaps);
   
-    G4VisAttributes* mustardVisAtt = new G4VisAttributes(G4Colour(1.0,1.0,0));
-    mustardVisAtt->SetForceSolid(true);
-    logicTGVolume->SetVisAttributes(mustardVisAtt);
+    G4VisAttributes* targetVisAtt = new G4VisAttributes(G4Colour(1.0,1.0,0));
+    targetVisAtt->SetForceSolid(true);
+    logicTGVolume->SetVisAttributes(targetVisAtt);
   
   
   //Gamma ParticleGuide //trapezoidal
@@ -576,8 +573,10 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
     //Geometry including SAAB Seaeye Leopard ROV parameters.
     //Prepared on May 26, 2025.
     
-    G4bool checkOverlaps = true;
-    
+    if (targetVersion = TargetVersion::fShip) {
+      targetShiftY = 77 * cm;
+    }
+
 //--------------------geometry--------------------//
 //---------------volumes-definition---------------//
     //World
@@ -603,22 +602,6 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
     G4VisAttributes *sandVisAtt = new G4VisAttributes(G4Colour(0.5, 0.5, 0.5));
     sandVisAtt->SetForceSolid(true);
     logicSANDVolume->SetVisAttributes(sandVisAtt);
-
-    // Target
-    G4double targetCoverDimX = 194 * cm;
-    G4double targetCoverDimY = 50 * cm;
-    G4double targetCoverDimZ = 50 * cm;
-    G4Box *solidTGVolumeCover = new G4Box("TargetVolumeCover", 0.5 * targetCoverDimX, 0.5 * targetCoverDimY, 0.5 * targetCoverDimZ);
-    G4LogicalVolume *logicTGVolumeCover = new G4LogicalVolume(solidTGVolumeCover, fLCSt, "TargetVolumeCover");
-    
-    G4double targetWallSize = 3 * mm;
-    G4Box *solidTGVolume = new G4Box("TargetVolume", 0.5 * targetCoverDimX - targetWallSize, 0.5 * targetCoverDimY - targetWallSize, 0.5 * targetCoverDimZ - targetWallSize);
-    G4LogicalVolume *logicTGVolume = new G4LogicalVolume(solidTGVolume, fTargetMat, "TargetVolume");
-    
-    G4VisAttributes *mustardVisAtt = new G4VisAttributes(G4Colour(1.0, 1.0, 0));
-    mustardVisAtt->SetForceSolid(true);
-    logicTGVolume->SetVisAttributes(mustardVisAtt);
-
 
     // Detector Case
     G4double detectorCaseRmin = 0 * cm;
@@ -739,18 +722,19 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
     rotationSand->rotateZ(90 * deg);
     G4RotationMatrix *rotationTarget = new G4RotationMatrix();
     rotationTarget->rotateY(90 * deg);
-    G4ThreeVector shiftFromTargetCenter(-0.5*detectorCaseRmax, 0., 0.);
+    G4double shiftOfROV = detectorCaseRmax;
+    G4ThreeVector shiftFromTargetCenter(-0.5*shiftOfROV, 0., 0.);
     //Sand
     G4ThreeVector setupShift(0., -170 * cm, 0.);
-    G4ThreeVector sandShift(-0.5*targetCoverDimY - 0.5*sandYLength, 0., 0.);
+    G4ThreeVector sandShift(- targetShiftY - 0.5*sandYLength, 0., 0.);
     new G4PVPlacement(rotationSand, sandShift + shiftFromTargetCenter, logicSANDVolume, "SAND", logicWorld, false, 1, checkOverlaps);
     //target
     G4ThreeVector targetCoverShift = setupShift + G4ThreeVector(
         0,
-        sandYLength / 2 + targetCoverDimY / 2,
+        sandYLength / 2 + targetShiftY,
         0.);
-    new G4PVPlacement(rotationTarget, targetCoverShift + shiftFromTargetCenter, logicTGVolumeCover, "TargetVolumeCover", logicWorld, false, 2, checkOverlaps);
-    new G4PVPlacement(0, G4ThreeVector(), logicTGVolume, "TargetVolume", logicTGVolumeCover, false, 3, checkOverlaps);
+
+    ConstructTarget(logicWorld, targetCoverShift + shiftFromTargetCenter);
 
     //construction parameters
     G4double detectorGeneratorDistance = 10 * cm;
@@ -760,8 +744,8 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
     rotDet->rotateX(90*deg);
     G4ThreeVector detectorCaseShift = targetCoverShift + G4ThreeVector(
         0.,
-        targetCoverDimY / 2 + detectorCaseHalfLength,
-        -detectorCaseRmax-detectorGeneratorDistance/2);
+        targetShiftY + detectorCaseHalfLength,
+        -shiftOfROV-detectorGeneratorDistance/2);
     new G4PVPlacement(rotDet, detectorCaseShift, logicDetectorCaseOuter, "DetectorCase", logicWorld, false, 4, checkOverlaps);
     new G4PVPlacement(0, G4ThreeVector(), logicDetectorCaseInner, "DetectorCaseInner", logicDetectorCaseOuter, false, 5, checkOverlaps);
     //Detector
@@ -772,7 +756,7 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
     rotGen->rotateX(90*deg);
     G4ThreeVector generatorCaseShift = targetCoverShift + G4ThreeVector(
         0.,
-        targetCoverDimY / 2 + generatorCaseHalfLength,
+        targetShiftY + generatorCaseHalfLength,
         generatorCaseRmax+detectorGeneratorDistance/2);
     new G4PVPlacement(rotGen, generatorCaseShift, logicGeneratorCaseOuter, "GeneratorCase", logicWorld, false, 7, checkOverlaps);
     new G4PVPlacement(0, G4ThreeVector(), logicGeneratorCaseInner, "GeneratorCaseInner", logicGeneratorCaseOuter, false, 8, checkOverlaps);
@@ -808,7 +792,7 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
     G4RotationMatrix *rotROV = new G4RotationMatrix();
     rotROV->rotateZ(90*deg);
     G4ThreeVector ROVShift = (armShiftGen + armShiftDet)/2 + G4ThreeVector(
-        0.5*ROVDimY-0.5*detectorCaseRmax,
+        0.5*ROVDimY-0.5*shiftOfROV,
         armHalfLengthZ + ROVDimX / 2,
         0.);
     new G4PVPlacement (rotROV, ROVShift, logicROVPP, "ROVPP", logicWorld, false, 14, checkOverlaps);
@@ -816,6 +800,53 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
     new G4PVPlacement (0, G4ThreeVector(), logicROVInner, "ROVSteelInner", logicROVSteel, false, 16, checkOverlaps);
 
     return physWorld;
+}
+
+void DetectorConstruction::ConstructTarget(G4LogicalVolume* logicWorld, G4ThreeVector targetCoverShift)
+{
+
+  if (targetVersion == TargetVersion::fAmmu) {
+    G4double targetCoverDimX = 194 * cm;
+    G4double targetCoverDimY = 50 * cm;
+    G4double targetCoverDimZ = 50 * cm;
+    G4Box *solidTGVolumeCover = new G4Box("TargetVolumeCover", 0.5 * targetCoverDimX, 0.5 * targetCoverDimY, 0.5 * targetCoverDimZ);
+    G4LogicalVolume *logicTGVolumeCover = new G4LogicalVolume(solidTGVolumeCover, fLCSt, "TargetVolumeCover");
+
+    G4Box *solidTGVolume = new G4Box("TargetVolume", 0.5 * targetCoverDimX - targetWallSize, 0.5 * targetCoverDimY - targetWallSize, 0.5 * targetCoverDimZ - targetWallSize);
+    G4LogicalVolume *logicTGVolume = new G4LogicalVolume(solidTGVolume, fTargetMat, "TargetVolume");
+
+    G4VisAttributes *targetVisAtt = new G4VisAttributes(G4Colour(1.0, 1.0, 0));
+    targetVisAtt->SetForceSolid(true);
+    logicTGVolume->SetVisAttributes(targetVisAtt);
+
+    G4RotationMatrix *rotationTarget = new G4RotationMatrix();
+    rotationTarget->rotateY(90 * deg);
+    new G4PVPlacement(rotationTarget, targetCoverShift, logicTGVolumeCover, "TargetVolumeCover", logicWorld, false, 2, checkOverlaps);
+    new G4PVPlacement(0, G4ThreeVector(), logicTGVolume, "TargetVolume", logicTGVolumeCover, false, 3, checkOverlaps);
+  } else if (targetVersion == TargetVersion::fShip) {
+    G4double targetCoverDimX = 400 * cm;
+    G4double targetCoverDimY = 400 * cm;
+    G4double targetCoverDimZ = targetWallSize;
+
+    G4Box *solidTGVolumeCover = new G4Box("TargetVolumeCover", 0.5 * targetCoverDimX, 0.5 * targetCoverDimY, 0.5 * targetCoverDimZ);
+    G4LogicalVolume *logicTGVolumeCover = new G4LogicalVolume(solidTGVolumeCover, fLCSt, "TargetVolumeCover");
+
+    G4double targetThickness = 200 * cm;
+    G4Box *solidTGVolume = new G4Box("TargetVolume", 0.5 * targetCoverDimX, 0.5 * targetCoverDimY, 0.5 * targetThickness);
+    G4LogicalVolume *logicTGVolume = new G4LogicalVolume(solidTGVolume, fTargetMat, "TargetVolume");
+
+    G4VisAttributes *targetVisAtt = new G4VisAttributes(G4Colour(1.0, 1.0, 0));
+    targetVisAtt->SetForceSolid(true);
+    logicTGVolume->SetVisAttributes(targetVisAtt);
+
+    G4RotationMatrix *rotationTarget = new G4RotationMatrix();
+    rotationTarget->rotateX(90 * deg);
+    G4double correctedTargetDetectorDist = -(2*targetShiftY-77 * cm) + targetDetectorDistance;
+    new G4PVPlacement(rotationTarget, G4ThreeVector(-(-targetCoverShift(1) + targetShiftY) + 0.5*targetCoverDimX,
+                                                    -(-targetCoverShift(0) + 0.5*targetWallSize + correctedTargetDetectorDist), 0), logicTGVolumeCover, "TargetVolumeCover", logicWorld, false, 2, checkOverlaps);
+    new G4PVPlacement(rotationTarget, G4ThreeVector(-(-targetCoverShift(1) + targetShiftY) + 0.5*targetCoverDimX,
+                                                    -(-targetCoverShift(0) + targetWallSize + 0.5*targetThickness + correctedTargetDetectorDist), 0), logicTGVolume, "TargetVolume", logicWorld, false, 3, checkOverlaps);
+  }
 }
 
 void DetectorConstruction::ConstructSDandField()
