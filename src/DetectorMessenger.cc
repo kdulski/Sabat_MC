@@ -48,6 +48,11 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* detCons) : G4UImessen
   fSetTargetVersion = new G4UIcmdWithAString("/sabat/det/setTargetVersion", this);
   fSetTargetVersion->SetGuidance("Option to change target version - ammo, ship");
 
+  fSetTargetRadius = new G4UIcmdWithADoubleAndUnit("/sabat/det/setTargetTotalRadius", this);
+  fSetTargetRadius->SetGuidance("Set the target total radius");
+  fSetTargetRadius->SetDefaultValue(30*mm);
+  fSetTargetRadius->SetUnitCandidates("mm");
+
   fSetTargetDetectorDistance = new G4UIcmdWithADoubleAndUnit("/sabat/det/setTargetDetectorDistance", this);
   fSetTargetDetectorDistance->SetGuidance("Set the distance between target and the setup");
   fSetTargetDetectorDistance->SetDefaultValue(15*cm);
@@ -57,6 +62,9 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* detCons) : G4UImessen
   fSetTargetWallThickness->SetGuidance("Set the target wall thickness");
   fSetTargetWallThickness->SetDefaultValue(30*mm);
   fSetTargetWallThickness->SetUnitCandidates("mm");
+
+  fSetTargetWallMaterial = new G4UIcmdWithAString("/sabat/det/setTargetWallMaterial", this);
+  fSetTargetWallMaterial->SetGuidance("Set the target wall material - LCSt, ST42, ST52");
 }
 
 DetectorMessenger::~DetectorMessenger()
@@ -65,8 +73,10 @@ DetectorMessenger::~DetectorMessenger()
   delete fSetTargetMaterial;
   delete fSetGeometryVersion;
   delete fSetTargetVersion;
+  delete fSetTargetRadius;
   delete fSetTargetDetectorDistance;
   delete fSetTargetWallThickness;
+  delete fSetTargetWallMaterial;
 }
 
 void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
@@ -99,12 +109,26 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
       fDet->SetTargetVersion(TargetVersion::fAmmu);
     } else if (newValue == "Ship" || newValue == "ship" || newValue == "s") {
       fDet->SetTargetVersion(TargetVersion::fShip);
+    } else if (newValue == "Barrel" || newValue == "barrel" || newValue == "b") {
+      fDet->SetTargetVersion(TargetVersion::fBarrel);
     } else {
       G4cout << "Unknown target version: " << newValue << G4endl;
     }
+  } else if (command == fSetTargetRadius) {
+    fDet->SetTargetTotalRadius(fSetTargetRadius->GetNewDoubleValue(newValue));
   } else if (command == fSetTargetDetectorDistance) {
     fDet->SetTargetDetectorDistance(fSetTargetDetectorDistance->GetNewDoubleValue(newValue));
   } else if (command == fSetTargetWallThickness) {
     fDet->SetTargetWallThickness(fSetTargetWallThickness->GetNewDoubleValue(newValue));
+  } else if (command == fSetTargetWallMaterial) {
+    if (newValue == "LCSt" || newValue == "lcst") {
+      fDet->SetTargetWallMaterial(TargetWallMaterial::fLCST);
+    } else if (newValue == "ST42" || newValue == "st42" || newValue == "42") {
+      fDet->SetTargetWallMaterial(TargetWallMaterial::fST42);
+    } else if (newValue == "ST52" || newValue == "st52" || newValue == "52") {
+      fDet->SetTargetWallMaterial(TargetWallMaterial::fST52);
+    } else {
+      G4cout << "Unknown target version: " << newValue << G4endl;
+    }
   }
 }

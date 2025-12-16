@@ -29,7 +29,10 @@ enum GeometryVersion {
   fV1, fV2
 };
 enum TargetVersion {
-  fAmmu, fShip
+  fAmmu, fShip, fBarrel
+};
+enum TargetWallMaterial {
+  fLCST, fST42, fST52
 };
 
 /// Detector construction class to define materials (with their physical properties) and detector geometry.
@@ -54,7 +57,9 @@ public:
   void SetTarget(TargetVariables target) {targetType = target;};
   void SetTargetVersion(TargetVersion target) {targetVersion = target;};
   void SetTargetDetectorDistance(G4double distance) {targetDetectorDistance = distance;};
+  void SetTargetTotalRadius(G4double radius) {targetTotalRadius = radius;};
   void SetTargetWallThickness(G4double thickness) {targetWallSize = thickness;};
+  void SetTargetWallMaterial(TargetWallMaterial material) {targetWallMat = material;};
 
   void SetCADFilename(std::string name) {
     filename = name;
@@ -74,7 +79,8 @@ private:
 
   TargetVariables targetType = TargetVariables::fWater;
   GeometryVersion geometryVersion = GeometryVersion::fV2;
-  TargetVersion targetVersion = TargetVersion::fShip;
+  TargetVersion targetVersion = TargetVersion::fBarrel;
+  TargetWallMaterial targetWallMat = TargetWallMaterial::fLCST;
   G4ThreeVector sourcePos;
       
   G4VSolid *cad_solid;
@@ -93,9 +99,11 @@ private:
   G4Material* fVetoMat;
   G4Material* fIron;
   G4Material* fLead;
+  G4Material* fTargetWalls;
 
   G4bool checkOverlaps = true;
-  G4double targetWallSize = 30 * mm; // 3 mm for fAmmu
+  G4double targetTotalRadius = 370 * mm; // for fBarrel
+  G4double targetWallSize = 6 * mm; // 3 mm for fAmmu, 15-25 mmc for fShip, 2mm albo 6 mm dla fBarrel
   G4double targetDetectorDistance = 0 * cm;
   G4double targetShiftY = 25 * cm; // 25*cm for fAmmu, 75*cm for fShip
 };

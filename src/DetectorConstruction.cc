@@ -89,6 +89,7 @@ void DetectorConstruction::ConstructMaterials()
     G4Element *Ca = man->FindOrBuildElement("Ca");
     G4Element *V = man->FindOrBuildElement("V");
     G4Element *Cr = man->FindOrBuildElement("Cr");
+    G4Element *Mn = man->FindOrBuildElement("Mn");
     G4Element *Fe = man->FindOrBuildElement("Fe");
     G4Element *Co = man->FindOrBuildElement("Co");
     G4Element *Ni = man->FindOrBuildElement("Ni");
@@ -96,6 +97,7 @@ void DetectorConstruction::ConstructMaterials()
     G4Element *Zn = man->FindOrBuildElement("Zn");
     G4Element *As = man->FindOrBuildElement("As");
     G4Element *Sr = man->FindOrBuildElement("Sr");
+    G4Element *Mo = man->FindOrBuildElement("Mo");
     G4Element *Cd = man->FindOrBuildElement("Cd");
     G4Element *Ba = man->FindOrBuildElement("Ba");
     G4Element *Hg = man->FindOrBuildElement("Hg");
@@ -242,6 +244,19 @@ void DetectorConstruction::ConstructMaterials()
     Low_Carbon_Steel->AddMaterial(fIron, 99.75 * perCent);
     Low_Carbon_Steel->AddMaterial(Carbon, 0.25 * perCent);
 
+    G4Material *ST42 = new G4Material("ST42", 7.85 * g / cm3, 6);
+    ST42->AddElement(Fe, 97.3 * perCent);
+    ST42->AddElement(Cr, 1.05 * perCent);
+    ST42->AddElement(Mn, 0.75 * perCent);
+    ST42->AddElement(C, 0.42 * perCent);
+    ST42->AddElement(Si, 0.25 * perCent);
+    ST42->AddElement(Mo, 0.23 * perCent);
+
+    G4Material *ST52 = new G4Material("ST52", 7.85 * g / cm3, 3);
+    ST52->AddElement(Fe, 98.18 * perCent);
+    ST52->AddElement(Mn, 1.6 * perCent);
+    ST52->AddElement(C, 0.22 * perCent);
+
     fLCSt = man->FindOrBuildMaterial("Low_Carbon_Steel");
 
     fPolypropylene = man->FindOrBuildMaterial("G4_POLYPROPYLENE");
@@ -267,6 +282,19 @@ void DetectorConstruction::ConstructMaterials()
         break;
     case TargetVariables::fAdamsite:
       fTargetMat = Adamsite;
+      break;
+    }
+
+    switch (targetWallMat)
+    {
+    case TargetWallMaterial::fLCST:
+        fTargetWalls = Low_Carbon_Steel;
+        break;
+    case TargetWallMaterial::fST42:
+        fTargetWalls = ST42;
+        break;
+    case TargetWallMaterial::fST52:
+      fTargetWalls = ST52;
       break;
     }
 }
@@ -734,6 +762,12 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
         sandYLength / 2 + targetShiftY,
         0.);
 
+    targetVersion = TargetVersion::fBarrel;
+    if (targetVersion == TargetVersion::fBarrel) {
+      targetCoverShift += G4ThreeVector(-87.5*cm + targetTotalRadius, 0, 0);
+      shiftFromTargetCenter += G4ThreeVector(0, -targetTotalRadius + 77.5*cm - targetDetectorDistance, 0); // 79.5 was taken from the fit to different radii
+    }
+
     ConstructTarget(logicWorld, targetCoverShift + shiftFromTargetCenter);
 
     //construction parameters
@@ -804,13 +838,12 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
 
 void DetectorConstruction::ConstructTarget(G4LogicalVolume* logicWorld, G4ThreeVector targetCoverShift)
 {
-
   if (targetVersion == TargetVersion::fAmmu) {
     G4double targetCoverDimX = 194 * cm;
     G4double targetCoverDimY = 50 * cm;
     G4double targetCoverDimZ = 50 * cm;
     G4Box *solidTGVolumeCover = new G4Box("TargetVolumeCover", 0.5 * targetCoverDimX, 0.5 * targetCoverDimY, 0.5 * targetCoverDimZ);
-    G4LogicalVolume *logicTGVolumeCover = new G4LogicalVolume(solidTGVolumeCover, fLCSt, "TargetVolumeCover");
+    G4LogicalVolume *logicTGVolumeCover = new G4LogicalVolume(solidTGVolumeCover, fTargetWalls, "TargetVolumeCover");
 
     G4Box *solidTGVolume = new G4Box("TargetVolume", 0.5 * targetCoverDimX - targetWallSize, 0.5 * targetCoverDimY - targetWallSize, 0.5 * targetCoverDimZ - targetWallSize);
     G4LogicalVolume *logicTGVolume = new G4LogicalVolume(solidTGVolume, fTargetMat, "TargetVolume");
@@ -829,7 +862,7 @@ void DetectorConstruction::ConstructTarget(G4LogicalVolume* logicWorld, G4ThreeV
     G4double targetCoverDimZ = targetWallSize;
 
     G4Box *solidTGVolumeCover = new G4Box("TargetVolumeCover", 0.5 * targetCoverDimX, 0.5 * targetCoverDimY, 0.5 * targetCoverDimZ);
-    G4LogicalVolume *logicTGVolumeCover = new G4LogicalVolume(solidTGVolumeCover, fLCSt, "TargetVolumeCover");
+    G4LogicalVolume *logicTGVolumeCover = new G4LogicalVolume(solidTGVolumeCover, fTargetWalls, "TargetVolumeCover");
 
     G4double targetThickness = 200 * cm;
     G4Box *solidTGVolume = new G4Box("TargetVolume", 0.5 * targetCoverDimX, 0.5 * targetCoverDimY, 0.5 * targetThickness);
@@ -846,6 +879,24 @@ void DetectorConstruction::ConstructTarget(G4LogicalVolume* logicWorld, G4ThreeV
                                                     -(-targetCoverShift(0) + 0.5*targetWallSize + correctedTargetDetectorDist), 0), logicTGVolumeCover, "TargetVolumeCover", logicWorld, false, 2, checkOverlaps);
     new G4PVPlacement(rotationTarget, G4ThreeVector(-(-targetCoverShift(1) + targetShiftY) + 0.5*targetCoverDimX,
                                                     -(-targetCoverShift(0) + targetWallSize + 0.5*targetThickness + correctedTargetDetectorDist), 0), logicTGVolume, "TargetVolume", logicWorld, false, 3, checkOverlaps);
+  } else if (targetVersion == TargetVersion::fBarrel) {
+    G4double targetCoverRadiusOut = targetTotalRadius;
+    G4double targetCoverRadiusIn = targetCoverRadiusOut - targetWallSize;
+    G4double targetCoverDimZ = 790 * mm;
+    G4Tubs* solidTGVolumeCover = new G4Tubs("TargetVolumeCover", targetCoverRadiusIn, targetCoverRadiusOut, targetCoverDimZ, 0., 2*M_PI*rad);
+    G4LogicalVolume *logicTGVolumeCover = new G4LogicalVolume(solidTGVolumeCover, fTargetWalls, "TargetVolumeCover");
+
+    G4Tubs *solidTGVolume = new G4Tubs("TargetVolume", 0.0, targetCoverRadiusIn, targetCoverDimZ - targetCoverRadiusIn + targetCoverRadiusOut, 0., 2*M_PI*rad);
+    G4LogicalVolume *logicTGVolume = new G4LogicalVolume(solidTGVolume, fTargetMat, "TargetVolume");
+
+    G4VisAttributes *targetVisAtt = new G4VisAttributes(G4Colour(1.0, 1.0, 0));
+    targetVisAtt->SetForceSolid(true);
+    logicTGVolume->SetVisAttributes(targetVisAtt);
+
+    G4RotationMatrix *rotationTarget = new G4RotationMatrix();
+  //  rotationTarget->rotateY(90 * deg);
+    new G4PVPlacement(rotationTarget, targetCoverShift + G4ThreeVector(7.5*cm, 0, 0), logicTGVolumeCover, "TargetVolumeCover", logicWorld, false, 2, checkOverlaps);
+    new G4PVPlacement(0, G4ThreeVector(), logicTGVolume, "TargetVolume", logicTGVolumeCover, false, 3, checkOverlaps);
   }
 }
 

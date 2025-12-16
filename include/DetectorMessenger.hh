@@ -54,8 +54,10 @@ private:
   G4UIcmdWithAString* fSetTargetMaterial = nullptr;
   G4UIcmdWithAString* fSetGeometryVersion = nullptr;
   G4UIcmdWithAString* fSetTargetVersion = nullptr;
+  G4UIcmdWithADoubleAndUnit* fSetTargetRadius = nullptr;
   G4UIcmdWithADoubleAndUnit* fSetTargetDetectorDistance = nullptr;
   G4UIcmdWithADoubleAndUnit* fSetTargetWallThickness = nullptr;
+  G4UIcmdWithAString* fSetTargetWallMaterial = nullptr;
 };
 
 #endif
