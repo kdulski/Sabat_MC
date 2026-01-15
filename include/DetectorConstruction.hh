@@ -23,7 +23,7 @@ class G4Material;
 class DetectorMessenger;
 
 enum TargetVariables {
-  fWater, fMustardGas, fTNT, fClark1, fClark2, fAdamsite
+  fWater, fMustardGas, fTNT, fClark1, fClark2, fAdamsite, fMazut
 };
 enum GeometryVersion {
   fV1, fV2
@@ -77,9 +77,9 @@ private:
   std::string filename;
   std::string filetype;
 
-  TargetVariables targetType = TargetVariables::fWater;
+  TargetVariables targetType = TargetVariables::fMazut;
   GeometryVersion geometryVersion = GeometryVersion::fV2;
-  TargetVersion targetVersion = TargetVersion::fBarrel;
+  TargetVersion targetVersion = TargetVersion::fShip;
   TargetWallMaterial targetWallMat = TargetWallMaterial::fLCST;
   G4ThreeVector sourcePos;
       
@@ -103,8 +103,8 @@ private:
 
   G4bool checkOverlaps = true;
   G4double targetTotalRadius = 370 * mm; // for fBarrel
-  G4double targetWallSize = 6 * mm; // 3 mm for fAmmu, 15-25 mmc for fShip, 2mm albo 6 mm dla fBarrel
-  G4double targetDetectorDistance = 0 * cm;
+  G4double targetWallSize = 15 * mm; // 3 mm for fAmmu, 15-25 mm for fShip, 2mm albo 6 mm dla fBarrel
+  G4double targetDetectorDistance = 40 * cm;
   G4double targetShiftY = 25 * cm; // 25*cm for fAmmu, 75*cm for fShip
 };
 

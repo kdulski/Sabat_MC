@@ -85,7 +85,7 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     if (newValue == "Water" || newValue == "water" || newValue == "W" || newValue == "w") {
       fDet->SetTarget(TargetVariables::fWater);
     } else if (newValue == "Mustard" || newValue == "mustard" ||newValue == "MustardGas" || newValue == "mustardgas" ||
-               newValue == "M" || newValue == "m" || newValue == "MG" || newValue == "mg") {
+               newValue == "MG" || newValue == "mg") {
       fDet->SetTarget(TargetVariables::fMustardGas);
     } else if (newValue == "TNT" || newValue == "tnt" || newValue == "T" || newValue == "t") {
       fDet->SetTarget(TargetVariables::fTNT);
@@ -94,6 +94,8 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     } else if (newValue == "Clark2" || newValue == "clark2" || newValue == "C2" || newValue == "c2") {
       fDet->SetTarget(TargetVariables::fClark2);
     } else if (newValue == "Adamsite" || newValue == "adamsite" || newValue == "Adam" || newValue == "adam" || newValue == "A" || newValue == "a") {
+      fDet->SetTarget(TargetVariables::fAdamsite);
+    } else if (newValue == "Mazut" || newValue == "mazut" || newValue == "Maz" || newValue == "maz" || newValue == "M" || newValue == "m") {
       fDet->SetTarget(TargetVariables::fAdamsite);
     }
   } else if (command == fSetGeometryVersion) {

@@ -215,6 +215,13 @@ void DetectorConstruction::ConstructMaterials()
     Adamsite->AddElement(Cl, 1);
     Adamsite->AddElement(N, 1);
 
+    G4Material *Mazut = new G4Material("Mazut", 0.925 * g / cm3, 5); // Mean Atomic Composition and Density
+    Mazut->AddElement(C, 86 * perCent);
+    Mazut->AddElement(H, 11 * perCent);
+    Mazut->AddElement(S, 2 * perCent);
+    Mazut->AddElement(N, 0.5 * perCent);
+    Mazut->AddElement(O, 0.5 * perCent);
+
     G4Material *SiO2 = new G4Material("Silicon_Dioxide", 2.196 * g / cm3, 2);
     SiO2->AddElement(Si, 1);
     SiO2->AddElement(O, 2);
@@ -282,6 +289,9 @@ void DetectorConstruction::ConstructMaterials()
         break;
     case TargetVariables::fAdamsite:
       fTargetMat = Adamsite;
+      break;
+    case TargetVariables::fMazut:
+      fTargetMat = Mazut;
       break;
     }
 
@@ -762,7 +772,6 @@ G4VPhysicalVolume *DetectorConstruction::ConstructV2()
         sandYLength / 2 + targetShiftY,
         0.);
 
-    targetVersion = TargetVersion::fBarrel;
     if (targetVersion == TargetVersion::fBarrel) {
       targetCoverShift += G4ThreeVector(-87.5*cm + targetTotalRadius, 0, 0);
       shiftFromTargetCenter += G4ThreeVector(0, -targetTotalRadius + 77.5*cm - targetDetectorDistance, 0); // 79.5 was taken from the fit to different radii
@@ -857,8 +866,8 @@ void DetectorConstruction::ConstructTarget(G4LogicalVolume* logicWorld, G4ThreeV
     new G4PVPlacement(rotationTarget, targetCoverShift, logicTGVolumeCover, "TargetVolumeCover", logicWorld, false, 2, checkOverlaps);
     new G4PVPlacement(0, G4ThreeVector(), logicTGVolume, "TargetVolume", logicTGVolumeCover, false, 3, checkOverlaps);
   } else if (targetVersion == TargetVersion::fShip) {
-    G4double targetCoverDimX = 400 * cm;
-    G4double targetCoverDimY = 400 * cm;
+    G4double targetCoverDimX = 600 * cm;
+    G4double targetCoverDimY = 800 * cm;
     G4double targetCoverDimZ = targetWallSize;
 
     G4Box *solidTGVolumeCover = new G4Box("TargetVolumeCover", 0.5 * targetCoverDimX, 0.5 * targetCoverDimY, 0.5 * targetCoverDimZ);
