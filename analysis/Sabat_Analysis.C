@@ -1,18 +1,17 @@
 #define Sabat_Analysis_cxx
-#include "Sabat_Analysis.h"
-#include <TH2.h>
-#include <TH2D.h>
-#include <TStyle.h>
-#include <TCanvas.h>
-#include <boost/random.hpp>
 #include <boost/random/normal_distribution.hpp>
+#include <boost/random.hpp>
+#include <fstream>
 #include <math.h>
-#include <fstream> 
 
+#include "Sabat_Analysis.h"
+#include <TCanvas.h>
+#include <TStyle.h>
+#include <TH2D.h>
+#include <TH2.h>
 
 void Sabat_Analysis::Loop()
 {
-
   TFile fNew("Out_" + inputName, "RECREATE");
 
   Double_t minEnergy = 0, maxEnergy = 14, binSize = 0.01; // in MeV
